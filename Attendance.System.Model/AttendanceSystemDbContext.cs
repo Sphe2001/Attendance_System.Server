@@ -24,6 +24,7 @@ namespace Attendance.System.Model
         public DbSet<Group> Groups { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<StudentAttendance> StudentAttendances { get; set; }
+        public DbSet<ClassAttendance> ClassAttendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -90,6 +91,12 @@ namespace Attendance.System.Model
             modelBuilder.Entity<StudentAttendance>()
                .HasOne(sa => sa.Class)
                .WithMany(c => c.StudentAttendances)
+               .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ClassAttendance>()
+               .HasOne(ca => ca.Class)
+               .WithMany(c => c.ClassAttendances)
+               .HasForeignKey(ca => ca.ClassId)
                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<StudentAttendance>()
