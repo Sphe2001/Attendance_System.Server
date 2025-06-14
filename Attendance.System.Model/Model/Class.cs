@@ -28,6 +28,7 @@ namespace Attendance.System.Model.Model
         public Module Module { get; set; }
         public Staff Staff { get; set; }
         public ICollection<StudentAttendance> StudentAttendances { get; set; }
+        public ICollection<ClassAttendance> ClassAttendances { get; set; }
         
 
 
