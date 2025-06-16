@@ -15,7 +15,7 @@ namespace Attendance.System.Model.Model
         [ForeignKey("UserId")]
         public int UserId { get; set; }
         [ForeignKey("DepartmentId")]
-        public int DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
         public int StaffNumber { get; set; }
         public string StaffNames { get; set; }
         public string StaffSurname { get; set; }

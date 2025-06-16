@@ -58,6 +58,12 @@ namespace Attendance.System.Model
                .HasForeignKey(s => s.DepartmentId)
                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Student>()
+              .HasOne(s => s.Course)
+              .WithMany(c => c.Students)
+              .HasForeignKey(s => s.CourseId)
+              .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Department>()
                .HasOne(d => d.Faculty)
                .WithMany(f => f.Departments)
@@ -104,12 +110,6 @@ namespace Attendance.System.Model
                .WithMany(s => s.Attendances)
                .HasForeignKey(sa => sa.StudentId)
                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Student>()
-              .HasOne(s => s.Group)
-              .WithMany(g => g.Students)
-              .HasForeignKey(s => s.GroupId)
-              .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<FaceData>()
              .HasOne(fd => fd.Student)

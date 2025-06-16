@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Attendance.System.Model.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class initialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -82,6 +82,9 @@ namespace Attendance.System.Model.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: false),
+                    IsPasswordSet = table.Column<bool>(type: "bit", nullable: false),
+                    IsPasswordResetVerified = table.Column<bool>(type: "bit", nullable: false),
+                    IsDisabled = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -123,7 +126,7 @@ namespace Attendance.System.Model.Migrations
                     AdminId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    FacultyId = table.Column<int>(type: "int", nullable: false),
+                    FacultyId = table.Column<int>(type: "int", nullable: true),
                     StaffNumber = table.Column<int>(type: "int", nullable: false),
                     AdminNames = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AdminSurname = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -153,7 +156,7 @@ namespace Attendance.System.Model.Migrations
                     StaffId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
                     StaffNumber = table.Column<int>(type: "int", nullable: false),
                     StaffNames = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StaffSurname = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -177,6 +180,47 @@ namespace Attendance.System.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Students",
+                columns: table => new
+                {
+                    StudentId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: true),
+                    StudentNumber = table.Column<int>(type: "int", nullable: false),
+                    StudentNames = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentSurname = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Students", x => x.StudentId);
+                    table.ForeignKey(
+                        name: "FK_Students_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "CourseId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Students_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "DepartmentId");
+                    table.ForeignKey(
+                        name: "FK_Students_FaceDatas_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "FaceDatas",
+                        principalColumn: "FaceDataId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Students_UserAccounts_UserId",
+                        column: x => x.UserId,
+                        principalTable: "UserAccounts",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Modules",
                 columns: table => new
                 {
@@ -184,7 +228,8 @@ namespace Attendance.System.Model.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CourseId = table.Column<int>(type: "int", nullable: false),
                     ModuleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ModuleCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ModuleCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StudentId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -195,6 +240,11 @@ namespace Attendance.System.Model.Migrations
                         principalTable: "Courses",
                         principalColumn: "CourseId",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Modules_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId");
                 });
 
             migrationBuilder.CreateTable(
@@ -256,43 +306,48 @@ namespace Attendance.System.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Students",
+                name: "GroupStudent",
                 columns: table => new
                 {
-                    StudentId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    GroupId = table.Column<int>(type: "int", nullable: false),
-                    StudentNumber = table.Column<int>(type: "int", nullable: false),
-                    StudentNames = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StudentSurname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DepartmentId = table.Column<int>(type: "int", nullable: true)
+                    GroupsGroupId = table.Column<int>(type: "int", nullable: false),
+                    StudentsStudentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Students", x => x.StudentId);
+                    table.PrimaryKey("PK_GroupStudent", x => new { x.GroupsGroupId, x.StudentsStudentId });
                     table.ForeignKey(
-                        name: "FK_Students_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalTable: "Departments",
-                        principalColumn: "DepartmentId");
-                    table.ForeignKey(
-                        name: "FK_Students_FaceDatas_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "FaceDatas",
-                        principalColumn: "FaceDataId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Students_Groups_GroupId",
-                        column: x => x.GroupId,
+                        name: "FK_GroupStudent_Groups_GroupsGroupId",
+                        column: x => x.GroupsGroupId,
                         principalTable: "Groups",
                         principalColumn: "GroupId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Students_UserAccounts_UserId",
-                        column: x => x.UserId,
-                        principalTable: "UserAccounts",
-                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GroupStudent_Students_StudentsStudentId",
+                        column: x => x.StudentsStudentId,
+                        principalTable: "Students",
+                        principalColumn: "StudentId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClassAttendances",
+                columns: table => new
+                {
+                    ClassAttendanceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClassId = table.Column<int>(type: "int", nullable: false),
+                    NumberOfStudents = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClassAttendances", x => x.ClassAttendanceId);
+                    table.ForeignKey(
+                        name: "FK_ClassAttendances_Classes_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "Classes",
+                        principalColumn: "ClassId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -344,6 +399,11 @@ namespace Attendance.System.Model.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ClassAttendances_ClassId",
+                table: "ClassAttendances",
+                column: "ClassId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Classes_GroupId",
                 table: "Classes",
                 column: "GroupId");
@@ -374,9 +434,19 @@ namespace Attendance.System.Model.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GroupStudent_StudentsStudentId",
+                table: "GroupStudent",
+                column: "StudentsStudentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Modules_CourseId",
                 table: "Modules",
                 column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Modules_StudentId",
+                table: "Modules",
+                column: "StudentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Staffs_DepartmentId",
@@ -405,14 +475,14 @@ namespace Attendance.System.Model.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Students_CourseId",
+                table: "Students",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Students_DepartmentId",
                 table: "Students",
                 column: "DepartmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Students_GroupId",
-                table: "Students",
-                column: "GroupId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_UserId",
@@ -433,37 +503,43 @@ namespace Attendance.System.Model.Migrations
                 name: "Admins");
 
             migrationBuilder.DropTable(
+                name: "ClassAttendances");
+
+            migrationBuilder.DropTable(
+                name: "GroupStudent");
+
+            migrationBuilder.DropTable(
                 name: "StudentAttendances");
 
             migrationBuilder.DropTable(
                 name: "Classes");
 
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "Groups");
 
             migrationBuilder.DropTable(
                 name: "Staffs");
 
             migrationBuilder.DropTable(
-                name: "FaceDatas");
-
-            migrationBuilder.DropTable(
-                name: "Groups");
-
-            migrationBuilder.DropTable(
-                name: "UserAccounts");
-
-            migrationBuilder.DropTable(
                 name: "Modules");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Courses");
 
             migrationBuilder.DropTable(
+                name: "FaceDatas");
+
+            migrationBuilder.DropTable(
+                name: "UserAccounts");
+
+            migrationBuilder.DropTable(
                 name: "Departments");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "Faculties");

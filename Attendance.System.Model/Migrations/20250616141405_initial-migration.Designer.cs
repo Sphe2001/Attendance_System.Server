@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Attendance.System.Model.Migrations
 {
     [DbContext(typeof(AttendanceSystemDbContext))]
-    [Migration("20250614115004_initial")]
-    partial class initial
+    [Migration("20250616141405_initial-migration")]
+    partial class initialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,7 +41,7 @@ namespace Attendance.System.Model.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("FacultyId")
+                    b.Property<int?>("FacultyId")
                         .HasColumnType("int");
 
                     b.Property<string>("Phone")
@@ -108,6 +108,30 @@ namespace Attendance.System.Model.Migrations
                     b.HasIndex("StaffId");
 
                     b.ToTable("Classes");
+                });
+
+            modelBuilder.Entity("Attendance.System.Model.Model.ClassAttendance", b =>
+                {
+                    b.Property<int>("ClassAttendanceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassAttendanceId"));
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NumberOfStudents")
+                        .HasColumnType("int");
+
+                    b.HasKey("ClassAttendanceId");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("ClassAttendances");
                 });
 
             modelBuilder.Entity("Attendance.System.Model.Model.Course", b =>
@@ -242,9 +266,14 @@ namespace Attendance.System.Model.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
                     b.HasKey("ModuleId");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("StudentId");
 
                     b.ToTable("Modules");
                 });
@@ -274,7 +303,7 @@ namespace Attendance.System.Model.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StaffId"));
 
-                    b.Property<int>("DepartmentId")
+                    b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Phone")
@@ -310,11 +339,15 @@ namespace Attendance.System.Model.Migrations
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("GroupId")
-                        .HasColumnType("int");
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentNames")
                         .IsRequired()
@@ -332,9 +365,9 @@ namespace Attendance.System.Model.Migrations
 
                     b.HasKey("StudentId");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex("CourseId");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -397,6 +430,15 @@ namespace Attendance.System.Model.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPasswordResetVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPasswordSet")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -411,13 +453,27 @@ namespace Attendance.System.Model.Migrations
                     b.ToTable("UserAccounts");
                 });
 
+            modelBuilder.Entity("GroupStudent", b =>
+                {
+                    b.Property<int>("GroupsGroupId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentsStudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GroupsGroupId", "StudentsStudentId");
+
+                    b.HasIndex("StudentsStudentId");
+
+                    b.ToTable("GroupStudent");
+                });
+
             modelBuilder.Entity("Attendance.System.Model.Model.Admin", b =>
                 {
                     b.HasOne("Attendance.System.Model.Model.Faculty", "Faculty")
                         .WithMany("Admins")
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Attendance.System.Model.Model.UserAccount", "UserAccount")
                         .WithOne("Admin")
@@ -455,6 +511,17 @@ namespace Attendance.System.Model.Migrations
                     b.Navigation("Module");
 
                     b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("Attendance.System.Model.Model.ClassAttendance", b =>
+                {
+                    b.HasOne("Attendance.System.Model.Model.Class", "Class")
+                        .WithMany("ClassAttendances")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
                 });
 
             modelBuilder.Entity("Attendance.System.Model.Model.Course", b =>
@@ -498,6 +565,10 @@ namespace Attendance.System.Model.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Attendance.System.Model.Model.Student", null)
+                        .WithMany("Modules")
+                        .HasForeignKey("StudentId");
+
                     b.Navigation("Course");
                 });
 
@@ -506,8 +577,7 @@ namespace Attendance.System.Model.Migrations
                     b.HasOne("Attendance.System.Model.Model.Department", "Department")
                         .WithMany("Staffs")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Attendance.System.Model.Model.UserAccount", "UserAccount")
                         .WithOne("Staff")
@@ -522,15 +592,14 @@ namespace Attendance.System.Model.Migrations
 
             modelBuilder.Entity("Attendance.System.Model.Model.Student", b =>
                 {
+                    b.HasOne("Attendance.System.Model.Model.Course", "Course")
+                        .WithMany("Students")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Attendance.System.Model.Model.Department", null)
                         .WithMany("Students")
                         .HasForeignKey("DepartmentId");
-
-                    b.HasOne("Attendance.System.Model.Model.Group", "Group")
-                        .WithMany("Students")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.HasOne("Attendance.System.Model.Model.FaceData", "FaceData")
                         .WithOne("Student")
@@ -544,9 +613,9 @@ namespace Attendance.System.Model.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("FaceData");
+                    b.Navigation("Course");
 
-                    b.Navigation("Group");
+                    b.Navigation("FaceData");
 
                     b.Navigation("UserAccount");
                 });
@@ -589,14 +658,33 @@ namespace Attendance.System.Model.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("GroupStudent", b =>
+                {
+                    b.HasOne("Attendance.System.Model.Model.Group", null)
+                        .WithMany()
+                        .HasForeignKey("GroupsGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Attendance.System.Model.Model.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsStudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Attendance.System.Model.Model.Class", b =>
                 {
+                    b.Navigation("ClassAttendances");
+
                     b.Navigation("StudentAttendances");
                 });
 
             modelBuilder.Entity("Attendance.System.Model.Model.Course", b =>
                 {
                     b.Navigation("Modules");
+
+                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("Attendance.System.Model.Model.Department", b =>
@@ -624,8 +712,6 @@ namespace Attendance.System.Model.Migrations
             modelBuilder.Entity("Attendance.System.Model.Model.Group", b =>
                 {
                     b.Navigation("Classes");
-
-                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("Attendance.System.Model.Model.Module", b =>
@@ -636,6 +722,8 @@ namespace Attendance.System.Model.Migrations
             modelBuilder.Entity("Attendance.System.Model.Model.Student", b =>
                 {
                     b.Navigation("Attendances");
+
+                    b.Navigation("Modules");
                 });
 
             modelBuilder.Entity("Attendance.System.Model.Model.UserAccount", b =>

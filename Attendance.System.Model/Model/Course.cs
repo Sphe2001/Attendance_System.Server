@@ -19,5 +19,6 @@ namespace Attendance.System.Model.Model
 
         public Department Department { get; set; }
         public ICollection<Module> Modules { get; set; }
+        public ICollection<Student> Students { get; set; }
     }
 }

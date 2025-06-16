@@ -10,8 +10,12 @@ namespace Attendance.System.Model.Model
         public string Email { get; set; }   
         public string Password { get; set; }
         [ForeignKey("RoleId")]
-        public int RoleId { get; set; } 
+        public int RoleId { get; set; }
+        public bool IsPasswordSet { get; set; }
+        public bool IsPasswordResetVerified { get; set; }
+        public bool IsDisabled { get; set; }
         public DateTime CreatedAt { get; set; }
+
 
         public Role Role { get; set; }
         public Admin Admin { get; set; }
