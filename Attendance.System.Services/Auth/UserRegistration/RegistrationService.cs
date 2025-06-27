@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Attendance.System.Model.Requests.Auth
+namespace Attendance.System.Services.Auth.UserRegistration
 {
-    public class AddRoleRequest
+    internal class RegistrationService : IRegistrationService
     {
-        public string RoleName { get; set; }
     }
 }
