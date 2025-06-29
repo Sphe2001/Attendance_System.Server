@@ -1,5 +1,7 @@
 using Attendance.System.Model;
+using Attendance.System.Services.Auth.UserRegistration;
 using Attendance.System.Services.Emailer;
+using Attendance.System.Services.Emailer.Registration;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,10 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHangfire(config => config.UseMemoryStorage());
 builder.Services.AddHangfireServer();
+
+builder.Services.AddScoped<AttendanceSystemDbContext, AttendanceSystemDbContext>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+builder.Services.AddScoped<IRegistrationEmailService, RegistrationEmailService>();
 
 var app = builder.Build();
 

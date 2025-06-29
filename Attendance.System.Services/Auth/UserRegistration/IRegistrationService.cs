@@ -11,6 +11,7 @@ namespace Attendance.System.Services.Auth.UserRegistration
     public interface IRegistrationService
     {
         Task<StatusMessageReturn> RegisterUserAsync(string email, string firstName, string lastName, string gender, string phoneNumber,
-                                                    int userNumber, string password, string course, string job);
+                                                    string userNumber, string password, string course, string job, string role);
+        
     }
 }

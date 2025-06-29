@@ -26,10 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Attendance.System.Model\Attendance.System.Model.csproj" />
 	  <ProjectReference Include="..\Attendance.System.Services\Attendance.System.Services.csproj" />
   </ItemGroup>
